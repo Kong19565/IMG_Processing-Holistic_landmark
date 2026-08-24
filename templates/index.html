@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaPipe Holistic Landmark Studio</title>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dark-theme">
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-person-rays"></i>
+            </div>
+            <div class="brand-text">
+                <h1>MediaPipe <span>Holistic Studio</span></h1>
+                <p class="subtitle">Real-Time Full Body & Face & Hands Analytics • Work_6</p>
+            </div>
+        </div>
+        <div class="header-badges">
+            <div class="status-badge" id="cameraStatusBadge">
+                <span class="status-dot"></span>
+                <span id="cameraStatusText">Camera Idle</span>
+            </div>
+            <div class="fps-badge">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span id="fpsValue">0.0</span> FPS
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="dashboard-grid">
+        <!-- Left Panel: Controls & Options -->
+        <aside class="control-panel card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-sliders"></i> Visual Layers & Config</h3>
+            </div>
+
+            <!-- Mode Selector Tabs -->
+            <div class="mode-tabs">
+                <button class="tab-btn active" data-mode="webcam" id="tabWebcam">
+                    <i class="fa-solid fa-video"></i> Live Webcam
+                </button>
+                <button class="tab-btn" data-mode="upload" id="tabUpload">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media
+                </button>
+            </div>
+
+            <!-- Landmark Toggle Switches -->
+            <div class="toggles-group">
+                <label class="toggle-item">
+                    <div class="toggle-info">
+                        <span class="toggle-title"><i class="fa-solid fa-face-smile text-cyan"></i> Face Mesh (478 pts)</span>
+                        <span class="toggle-desc">Tessellation, contours & irises</span>
+                    </div>
+                    <input type="checkbox" id="toggleFace" checked>
+                    <span class="slider"></span>
+                </label>
+
+                <label class="toggle-item">
+                    <div class="toggle-info">
+                        <span class="toggle-title"><i class="fa-solid fa-network-wired text-muted"></i> Dense Tessellation</span>
+                        <span class="toggle-desc">Dense triangular polygon mesh</span>
+                    </div>
+                    <input type="checkbox" id="toggleTesselation" checked>
+                    <span class="slider"></span>
+                </label>
+
+                <label class="toggle-item">
+                    <div class="toggle-info">
+                        <span class="toggle-title"><i class="fa-solid fa-person text-orange"></i> Body Pose (33 pts)</span>
+                        <span class="toggle-desc">Full skeleton bone topology</span>
+                    </div>
+                    <input type="checkbox" id="togglePose" checked>
+                    <span class="slider"></span>
+                </label>
+
+                <label class="toggle-item">
+                    <div class="toggle-info">
+                        <span class="toggle-title"><i class="fa-solid fa-hand text-magenta"></i> Hands (21x2 pts)</span>
+                        <span class="toggle-desc">Left and right finger joints</span>
+                    </div>
+                    <input type="checkbox" id="toggleHands" checked>
+                    <span class="slider"></span>
+                </label>
+
+                <label class="toggle-item">
+                    <div class="toggle-info">
+                        <span class="toggle-title"><i class="fa-solid fa-chart-line text-yellow"></i> Biometrics HUD</span>
+                        <span class="toggle-desc">Joint angles & posture status</span>
+                    </div>
+                    <input type="checkbox" id="toggleAnalytics" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="action-buttons" id="webcamActions">
+                <button class="btn btn-primary" id="btnToggleCamera">
+                    <i class="fa-solid fa-play"></i> Start Camera Stream
+                </button>
+                <button class="btn btn-secondary" id="btnSnapshot">
+                    <i class="fa-solid fa-camera"></i> Save Snapshot
+                </button>
+            </div>
+
+            <!-- Upload Section (Hidden in Webcam Mode) -->
+            <div class="upload-section hidden" id="uploadActions">
+                <div class="dropzone" id="mediaDropzone">
+                    <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                    <p class="drop-text">Drag & drop image or video here</p>
+                    <p class="drop-hint">Supports JPG, PNG, WEBP, MP4</p>
+                    <input type="file" id="fileInput" accept="image/*,video/mp4" hidden>
+                    <button class="btn btn-outline" id="btnBrowseFile">
+                        <i class="fa-solid fa-folder-open"></i> Browse File
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Video Display & Visualizer -->
+        <section class="viewer-panel card">
+            <div class="card-header flex-between">
+                <h3><i class="fa-solid fa-display"></i> Viewport</h3>
+                <div class="view-tools">
+                    <button class="tool-btn" id="btnFullscreen" title="Toggle Fullscreen">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper" id="viewportContainer">
+                <!-- Live Video MJPEG Stream -->
+                <img id="liveStreamImg" src="" alt="Live Stream Viewport" class="stream-element hidden">
+
+                <!-- Uploaded Image / Video Display -->
+                <img id="uploadedImageResult" src="" alt="Uploaded Result" class="stream-element hidden">
+                <video id="uploadedVideoResult" controls class="stream-element hidden"></video>
+
+                <!-- Placeholder when idle -->
+                <div class="viewport-placeholder" id="viewportPlaceholder">
+                    <i class="fa-solid fa-eye-slash placeholder-icon"></i>
+                    <h4>Stream is offline</h4>
+                    <p>Click "Start Camera Stream" or upload an image to begin tracking</p>
+                </div>
+
+                <!-- Processing Spinner -->
+                <div class="spinner-overlay hidden" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p id="spinnerText">Processing with MediaPipe Tasks...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Live Analytics & Keypoint Inspector -->
+        <aside class="analytics-panel card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-pie"></i> Real-time Telemetry</h3>
+            </div>
+
+            <!-- Posture & Gesture Metrics Summary -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Posture Status</div>
+                    <div class="metric-value text-accent" id="valPosture">Unknown</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Gesture / Hands</div>
+                    <div class="metric-value text-cyan" id="valGesture">None</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Torso Inclination</div>
+                    <div class="metric-value" id="valTorsoTilt">-- °</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Shoulder Alignment</div>
+                    <div class="metric-value" id="valShoulderTilt">-- °</div>
+                </div>
+            </div>
+
+            <!-- Joint Angle Gauges -->
+            <div class="angles-section">
+                <h4><i class="fa-solid fa-ruler-combined"></i> Joint Angles</h4>
+                
+                <div class="angle-row">
+                    <span class="angle-name">Left Elbow</span>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-cyan" id="barLeftElbow" style="width: 0%"></div>
+                    </div>
+                    <span class="angle-deg" id="degLeftElbow">--°</span>
+                </div>
+
+                <div class="angle-row">
+                    <span class="angle-name">Right Elbow</span>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-orange" id="barRightElbow" style="width: 0%"></div>
+                    </div>
+                    <span class="angle-deg" id="degRightElbow">--°</span>
+                </div>
+
+                <div class="angle-row">
+                    <span class="angle-name">Left Knee</span>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-cyan" id="barLeftKnee" style="width: 0%"></div>
+                    </div>
+                    <span class="angle-deg" id="degLeftKnee">--°</span>
+                </div>
+
+                <div class="angle-row">
+                    <span class="angle-name">Right Knee</span>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-orange" id="barRightKnee" style="width: 0%"></div>
+                    </div>
+                    <span class="angle-deg" id="degRightKnee">--°</span>
+                </div>
+            </div>
+
+            <!-- Landmark Points Count -->
+            <div class="landmark-summary">
+                <h4><i class="fa-solid fa-circle-nodes"></i> Landmark Count</h4>
+                <div class="summary-chips">
+                    <span class="chip"><i class="fa-solid fa-face-smile"></i> Face: <strong id="cntFace">0</strong></span>
+                    <span class="chip"><i class="fa-solid fa-person"></i> Pose: <strong id="cntPose">0</strong></span>
+                    <span class="chip"><i class="fa-solid fa-hand"></i> Left: <strong id="cntLeftHand">0</strong></span>
+                    <span class="chip"><i class="fa-solid fa-hand"></i> Right: <strong id="cntRightHand">0</strong></span>
+                </div>
+            </div>
+
+            <!-- JSON Data Viewer Collapsible -->
+            <div class="json-inspector">
+                <div class="inspector-header" id="btnToggleJson">
+                    <span><i class="fa-solid fa-code"></i> Landmark JSON Inspector</span>
+                    <i class="fa-solid fa-chevron-down" id="jsonChevron"></i>
+                </div>
+                <pre class="json-content hidden" id="jsonViewer">{\n  "status": "idle"\n}</pre>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>MediaPipe Holistic Tasks API • Image Processing Work_6 • Built with Python, OpenCV & Flask</p>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
