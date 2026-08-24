@@ -57,40 +57,22 @@ Work_6/
 
 ---
 
-## 📐 3. ทฤษฎีและการคำนวณชีวกลศาสตร์ (Biomechanical Analytics)
+## 🚀 3. การติดตั้งและเริ่มต้นใช้งาน (Installation & Setup)
 
-### 3.1 การคำนวณมุมข้อต่อ 2D (Joint Angle Formula)
-คำนวณมุมระหว่าง 3 จุดพิกัด $\vec{A}, \vec{B}, \vec{C}$ โดยให้จุด $\vec{B}$ เป็นจุดยอดมุม (Vertex) เช่น ข้อศอก หรือ ข้อเข่า:
-
-$$\vec{u} = \vec{A} - \vec{B}, \quad \vec{v} = \vec{C} - \vec{B}$$
-
-$$\theta = \arccos\left( \frac{\vec{u} \cdot \vec{v}}{\|\vec{u}\| \|\vec{v}\|} \right) \times \frac{180^\circ}{\pi}$$
-
-### 3.2 การประเมินความเอียงของลำตัว (Torso Inclination)
-คำนวณจากจุดกึ่งกลางสะโพก ($\text{Mid-Hip}$) ไปยังจุดกึ่งกลางไหล่ ($\text{Mid-Shoulder}$) เทียบกับแนวดิ่ง:
-
-$$\Delta x = x_{\text{shoulder}} - x_{\text{hip}}, \quad \Delta y = -(y_{\text{shoulder}} - y_{\text{hip}})$$
-
-$$\text{Tilt Angle} = \left|\arctan2(\Delta x, \Delta y)\right| \times \frac{180^\circ}{\pi}$$
-
----
-
-## 🚀 4. การติดตั้งและเริ่มต้นใช้งาน (Installation & Setup)
-
-### 4.1 ข้อกำหนดสภาพแวดล้อม
+### 3.1 ข้อกำหนดสภาพแวดล้อม
 - Python 3.10, 3.11, หรือ 3.12
 - เว็บแคม (สำหรับการทดสอบกล้องสด)
 
-### 4.2 ติดตั้ง Dependencies
+### 3.2 ติดตั้ง Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## 💻 5. การใช้งานผ่าน Command-Line Interface (CLI)
+## 💻 4. การใช้งานผ่าน Command-Line Interface (CLI)
 
-### 5.1 ประมวลผลจากกล้องเว็บแคมสด (Live Webcam)
+### 4.1 ประมวลผลจากกล้องเว็บแคมสด (Live Webcam)
 ```bash
 python main_cli.py --source webcam
 ```
@@ -102,27 +84,27 @@ python main_cli.py --source webcam
 - `S` : บันทึกภาพ Screenshot ลงโฟลเดอร์ `output/`
 - `Q` หรือ `ESC` : ปิดโปรแกรม
 
-### 5.2 ประมวลผลรูปภาพเดี่ยว
+### 4.2 ประมวลผลรูปภาพเดี่ยว
 ```bash
 python main_cli.py --source sample_media/sample_pose1.jpg --output output/result.jpg --export-json
 ```
 
-### 5.3 ประมวลผลไฟล์วิดีโอ
+### 4.3 ประมวลผลไฟล์วิดีโอ
 ```bash
 python main_cli.py --source sample_media/sample_clip.mp4 --output output/video_result.mp4
 ```
 
 ---
 
-## 🌐 6. การใช้งานเว็บแอปพลิเคชัน (Flask Web Dashboard)
+## 🌐 5. การใช้งานเว็บแอปพลิเคชัน (Flask Web Dashboard)
 
-### 6.1 รันเซิร์ฟเวอร์
+### 5.1 รันเซิร์ฟเวอร์
 ```bash
 python app.py
 ```
 เปิดเว็บเบราว์เซอร์และเข้าไปที่: `http://localhost:5000`
 
-### 6.2 ฟีเจอร์บน Web Dashboard
+### 5.2 ฟีเจอร์บน Web Dashboard
 - **Live Stream MJPEG Viewport:** รับชมภาพจากกล้องเว็บแคมพร้อม Overlay แบบ Real-time
 - **Dynamic Layer Toggles:** สลับเปิด-ปิด Face Mesh, Pose Skeleton, Hands, และ Biometrics ได้ทันที
 - **Drag-and-Drop Media Uploader:** รองรับการลากไฟล์รูปภาพหรือวิดีโอเพื่อวิเคราะห์และแสดงผลลัพธ์
@@ -131,7 +113,7 @@ python app.py
 
 ---
 
-## 🧪 7. การทดสอบระบบ (Automated Tests)
+## 🧪 6. การทดสอบระบบ (Automated Tests)
 
 รันชุดทดสอบความถูกต้องของโมดูล Core และ Web APIs:
 ```bash
@@ -140,7 +122,7 @@ python -m unittest discover -s tests -p "test_*.py"
 
 ---
 
-## 🌿 8. ประวัติการพัฒนาและ Git Branching Strategy
+## 🌿 7. ประวัติการพัฒนาและ Git Branching Strategy
 
 โครงการนี้พัฒนาและแบ่งงานออกเป็น Feature Branches อย่างเป็นระบบ:
 1. `feat/core-holistic-engine`: พัฒนา `core/` (Detector, Drawer, Analytics, Model Manager)
