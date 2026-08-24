@@ -1,0 +1,820 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MediaPipe Holistic Landmark Detection & Biometric Analytics API",
+    "description": "API Specification and Test Scenarios for Digital Image Processing (Work_6) - Holistic Landmark Detection, Posture Analysis, Biomechanical Telemetry, and Video Processing.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Work_6 Team",
+      "url": "https://github.com/Kong19565/IMG_Processing-Holistic_landmark"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "http://127.0.0.1:5000",
+      "description": "Localhost IPv4"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Camera & Stream",
+      "description": "Live Webcam Stream Control and MJPEG Video Feed"
+    },
+    {
+      "name": "Telemetry & Analytics",
+      "description": "Real-time Biomechanical Angles, Landmark Telemetry, and Gestures"
+    },
+    {
+      "name": "Media Processing",
+      "description": "Static Image and Video Landmark Processing with Overlay Generation"
+    }
+  ],
+  "paths": {
+    "/api/camera/start": {
+      "post": {
+        "tags": ["Camera & Stream"],
+        "summary": "Start Live Camera Stream",
+        "description": "Initializes and starts the background OpenCV camera capture thread.\n\n**Test Case Scenarios:**\n- **Scenario TS-CAM-01 (Positive):** Successful camera hardware initialization.\n- **Scenario TS-CAM-02 (Negative/Hardware Failure):** Webcam not connected or busy.",
+        "operationId": "startCamera",
+        "responses": {
+          "200": {
+            "description": "Camera started successfully or is already running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                },
+                "examples": {
+                  "TS-CAM-01_Success": {
+                    "summary": "TS-CAM-01: Camera Started",
+                    "value": {
+                      "status": "ok",
+                      "message": "Camera started"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Camera hardware failure / could not open device",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                },
+                "examples": {
+                  "TS-CAM-02_Failure": {
+                    "summary": "TS-CAM-02: Device Not Found",
+                    "value": {
+                      "status": "error",
+                      "message": "Could not open camera"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/camera/stop": {
+      "post": {
+        "tags": ["Camera & Stream"],
+        "summary": "Stop Live Camera Stream",
+        "description": "Stops the background capture loop and releases the OpenCV VideoCapture resource.\n\n**Test Case Scenario:**\n- **Scenario TS-CAM-03 (Positive):** Gracefully stop active camera.",
+        "operationId": "stopCamera",
+        "responses": {
+          "200": {
+            "description": "Camera stopped successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                },
+                "examples": {
+                  "TS-CAM-03_Success": {
+                    "summary": "TS-CAM-03: Camera Stopped",
+                    "value": {
+                      "status": "ok",
+                      "message": "Camera stopped"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/camera/status": {
+      "get": {
+        "tags": ["Camera & Stream"],
+        "summary": "Get Camera Running Status and FPS",
+        "description": "Retrieves the current execution state of the webcam capture thread along with running FPS.\n\n**Test Case Scenarios:**\n- **Scenario TS-CAM-04 (Idle):** Check status when camera is off.\n- **Scenario TS-CAM-05 (Active):** Check status when camera is streaming.",
+        "operationId": "getCameraStatus",
+        "responses": {
+          "200": {
+            "description": "Current camera status object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CameraStatusResponse"
+                },
+                "examples": {
+                  "TS-CAM-04_Idle": {
+                    "summary": "TS-CAM-04: Camera Inactive",
+                    "value": {
+                      "is_running": false,
+                      "fps": 0.0
+                    }
+                  },
+                  "TS-CAM-05_Active": {
+                    "summary": "TS-CAM-05: Camera Active",
+                    "value": {
+                      "is_running": true,
+                      "fps": 29.4
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video_feed": {
+      "get": {
+        "tags": ["Camera & Stream"],
+        "summary": "MJPEG Live Video Stream with Annotation Overlays",
+        "description": "Returns a continuous multipart MJPEG stream from the live camera with real-time MediaPipe Holistic landmark skeleton and telemetry overlay.\n\n**Test Case Scenarios:**\n- **Scenario TS-STR-01 (All Overlays Enabled):** `face=1`, `tesselation=1`, `pose=1`, `hands=1`, `analytics=1`\n- **Scenario TS-STR-02 (Pose Only / Clean View):** `face=0`, `tesselation=0`, `pose=1`, `hands=0`, `analytics=1`",
+        "operationId": "getVideoFeed",
+        "parameters": [
+          {
+            "name": "face",
+            "in": "query",
+            "description": "Toggle Face Mesh bounding/contour overlay (1: On, 0: Off)",
+            "required": false,
+            "schema": { "type": "string", "enum": ["0", "1"], "default": "1" }
+          },
+          {
+            "name": "tesselation",
+            "in": "query",
+            "description": "Toggle full Face 468-tesselation mesh (1: On, 0: Off)",
+            "required": false,
+            "schema": { "type": "string", "enum": ["0", "1"], "default": "1" }
+          },
+          {
+            "name": "pose",
+            "in": "query",
+            "description": "Toggle 33-point Pose body skeleton (1: On, 0: Off)",
+            "required": false,
+            "schema": { "type": "string", "enum": ["0", "1"], "default": "1" }
+          },
+          {
+            "name": "hands",
+            "in": "query",
+            "description": "Toggle 21-point Left/Right hand skeletons (1: On, 0: Off)",
+            "required": false,
+            "schema": { "type": "string", "enum": ["0", "1"], "default": "1" }
+          },
+          {
+            "name": "analytics",
+            "in": "query",
+            "description": "Toggle Biomechanical telemetry HUD and angle arc visualizers (1: On, 0: Off)",
+            "required": false,
+            "schema": { "type": "string", "enum": ["0", "1"], "default": "1" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Multipart MJPEG Video Stream",
+            "content": {
+              "multipart/x-mixed-replace; boundary=frame": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/telemetry": {
+      "get": {
+        "tags": ["Telemetry & Analytics"],
+        "summary": "Get Live Biometric Telemetry & Landmark Data",
+        "description": "Polls the latest frame's biomechanical metrics (joint angles, torso posture, hand gestures) and serialized landmark coordinates from the active webcam.\n\n**Test Case Scenarios:**\n- **Scenario TS-TEL-01 (Idle/No Frame):** Camera inactive or initial frame buffering.\n- **Scenario TS-TEL-02 (Live Upright Body Detected):** Full body in frame, angles computed, posture: Upright / Balanced.\n- **Scenario TS-TEL-03 (Live Hands Raised Gesture):** Person raises left/right hand above shoulder.",
+        "operationId": "getTelemetry",
+        "responses": {
+          "200": {
+            "description": "Telemetry and biometric data object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelemetryResponse"
+                },
+                "examples": {
+                  "TS-TEL-01_Idle": {
+                    "summary": "TS-TEL-01: Camera Idle",
+                    "value": {
+                      "status": "idle",
+                      "fps": 0.0,
+                      "analytics": {},
+                      "face_landmarks_count": 0,
+                      "pose_landmarks_count": 0,
+                      "left_hand_landmarks_count": 0,
+                      "right_hand_landmarks_count": 0
+                    }
+                  },
+                  "TS-TEL-02_Live_Upright": {
+                    "summary": "TS-TEL-02: Live Person Upright",
+                    "value": {
+                      "status": "live",
+                      "fps": 31.2,
+                      "analytics": {
+                        "left_elbow_angle": 164.5,
+                        "right_elbow_angle": 158.2,
+                        "left_knee_angle": 178.0,
+                        "right_knee_angle": 176.4,
+                        "left_shoulder_angle": 24.1,
+                        "right_shoulder_angle": 22.8,
+                        "shoulder_slope": 1.2,
+                        "torso_inclination": 3.5,
+                        "posture_status": "Upright / Balanced",
+                        "hands_up_status": "Hands Down"
+                      },
+                      "face_landmarks_count": 478,
+                      "pose_landmarks_count": 33,
+                      "left_hand_landmarks_count": 21,
+                      "right_hand_landmarks_count": 21,
+                      "landmarks": {
+                        "face_landmarks": [{"x": 0.512, "y": 0.324, "z": -0.02}],
+                        "pose_landmarks": [{"x": 0.501, "y": 0.280, "z": -0.15, "visibility": 0.99}],
+                        "left_hand_landmarks": [{"x": 0.35, "y": 0.65, "z": -0.01}],
+                        "right_hand_landmarks": [{"x": 0.65, "y": 0.66, "z": -0.01}]
+                      }
+                    }
+                  },
+                  "TS-TEL-03_Hands_Raised": {
+                    "summary": "TS-TEL-03: Both Hands Raised Gesture",
+                    "value": {
+                      "status": "live",
+                      "fps": 29.8,
+                      "analytics": {
+                        "left_elbow_angle": 88.4,
+                        "right_elbow_angle": 91.0,
+                        "left_knee_angle": 179.1,
+                        "right_knee_angle": 178.5,
+                        "left_shoulder_angle": 142.3,
+                        "right_shoulder_angle": 145.0,
+                        "shoulder_slope": 0.5,
+                        "torso_inclination": 2.1,
+                        "posture_status": "Upright / Balanced",
+                        "hands_up_status": "Both Hands Raised"
+                      },
+                      "face_landmarks_count": 478,
+                      "pose_landmarks_count": 33,
+                      "left_hand_landmarks_count": 21,
+                      "right_hand_landmarks_count": 21
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/process_image": {
+      "post": {
+        "tags": ["Media Processing"],
+        "summary": "Process Static Image & Compute Landmarks",
+        "description": "Accepts an uploaded image file (JPEG, PNG, WEBP), performs MediaPipe Holistic inference, generates annotated visual overlay, calculates biometric angles, and returns base64 image + coordinate JSON.\n\n**Test Case Scenarios:**\n- **Scenario TS-IMG-01 (Positive - Full Body Pose):** Valid image with full body person.\n- **Scenario TS-IMG-02 (Positive - Custom Layer Options):** Face mesh & hands off, Pose only.\n- **Scenario TS-IMG-03 (Positive - No Person in Image):** Landscape or empty image (0 landmarks detected gracefully).\n- **Scenario TS-IMG-04 (Negative - Missing File Field):** Request body without `file` parameter.\n- **Scenario TS-IMG-05 (Negative - Empty File Upload):** `file` provided with empty filename or 0 bytes.\n- **Scenario TS-IMG-06 (Negative - Corrupted/Invalid Image):** Non-image text/binary sent as file.",
+        "operationId": "processImage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file to analyze (JPEG, PNG, etc.)"
+                  },
+                  "face": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1",
+                    "description": "Draw face mesh outline"
+                  },
+                  "tesselation": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1",
+                    "description": "Draw dense face tesselation"
+                  },
+                  "pose": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1",
+                    "description": "Draw pose skeleton & joints"
+                  },
+                  "hands": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1",
+                    "description": "Draw left & right hand landmarks"
+                  },
+                  "analytics": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1",
+                    "description": "Draw biometric HUD overlay on image"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image analyzed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessImageResponse"
+                },
+                "examples": {
+                  "TS-IMG-01_Success": {
+                    "summary": "TS-IMG-01: Full Body Analysis",
+                    "value": {
+                      "status": "success",
+                      "inference_time_ms": 48.2,
+                      "fps": 20.7,
+                      "annotated_image_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
+                      "analytics": {
+                        "left_elbow_angle": 155.2,
+                        "right_elbow_angle": 160.1,
+                        "left_knee_angle": 175.4,
+                        "right_knee_angle": 177.0,
+                        "left_shoulder_angle": 30.5,
+                        "right_shoulder_angle": 28.2,
+                        "shoulder_slope": 0.8,
+                        "torso_inclination": 4.1,
+                        "posture_status": "Upright / Balanced",
+                        "hands_up_status": "Hands Down"
+                      },
+                      "face_landmarks_count": 478,
+                      "pose_landmarks_count": 33,
+                      "left_hand_landmarks_count": 21,
+                      "right_hand_landmarks_count": 21,
+                      "landmarks": {
+                        "face_landmarks": [],
+                        "pose_landmarks": [],
+                        "left_hand_landmarks": [],
+                        "right_hand_landmarks": []
+                      }
+                    }
+                  },
+                  "TS-IMG-03_NoPerson": {
+                    "summary": "TS-IMG-03: No Person in Image",
+                    "value": {
+                      "status": "success",
+                      "inference_time_ms": 25.1,
+                      "fps": 39.8,
+                      "annotated_image_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
+                      "analytics": {
+                        "left_elbow_angle": null,
+                        "right_elbow_angle": null,
+                        "left_knee_angle": null,
+                        "right_knee_angle": null,
+                        "left_shoulder_angle": null,
+                        "right_shoulder_angle": null,
+                        "shoulder_slope": null,
+                        "torso_inclination": null,
+                        "posture_status": "Unknown",
+                        "hands_up_status": "None"
+                      },
+                      "face_landmarks_count": 0,
+                      "pose_landmarks_count": 0,
+                      "left_hand_landmarks_count": 0,
+                      "right_hand_landmarks_count": 0,
+                      "landmarks": {
+                        "face_landmarks": [],
+                        "pose_landmarks": [],
+                        "left_hand_landmarks": [],
+                        "right_hand_landmarks": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid upload or decoding failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "TS-IMG-04_MissingFile": {
+                    "summary": "TS-IMG-04: No File Uploaded",
+                    "value": {
+                      "error": "No file uploaded"
+                    }
+                  },
+                  "TS-IMG-05_EmptyFilename": {
+                    "summary": "TS-IMG-05: Empty Filename",
+                    "value": {
+                      "error": "Empty filename"
+                    }
+                  },
+                  "TS-IMG-06_Corrupted": {
+                    "summary": "TS-IMG-06: Invalid Image Format",
+                    "value": {
+                      "error": "Invalid image format"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/process_video": {
+      "post": {
+        "tags": ["Media Processing"],
+        "summary": "Process Uploaded Video & Render Overlay MP4",
+        "description": "Uploads a video file (MP4, AVI, MOV), executes Holistic Landmarker in VIDEO running mode across all frames, encodes the annotated video to MP4, and returns statistics and the download URL.\n\n**Test Case Scenarios:**\n- **Scenario TS-VID-01 (Positive - Short Video Analysis):** Upload standard 30fps clip.\n- **Scenario TS-VID-02 (Negative - Missing Video File):** Request with no file parameter.\n- **Scenario TS-VID-03 (Negative - Corrupted Video):** Non-video file or unreadable video codec.",
+        "operationId": "processVideo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Video file to process (MP4, MOV, etc.)"
+                  },
+                  "face": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1"
+                  },
+                  "tesselation": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1"
+                  },
+                  "pose": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1"
+                  },
+                  "hands": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1"
+                  },
+                  "analytics": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "default": "1"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Video successfully processed and saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessVideoResponse"
+                },
+                "examples": {
+                  "TS-VID-01_Success": {
+                    "summary": "TS-VID-01: Video Analysis Complete",
+                    "value": {
+                      "status": "success",
+                      "output_video_url": "/static/uploads/output_1724500000_sample_clip.mp4",
+                      "processed_frames": 120,
+                      "total_time_seconds": 4.15,
+                      "average_fps": 28.9,
+                      "analytics": {
+                        "left_elbow_angle": 160.0,
+                        "right_elbow_angle": 158.4,
+                        "left_knee_angle": 178.2,
+                        "right_knee_angle": 177.5,
+                        "left_shoulder_angle": 25.0,
+                        "right_shoulder_angle": 24.3,
+                        "shoulder_slope": 0.4,
+                        "torso_inclination": 2.8,
+                        "posture_status": "Upright / Balanced",
+                        "hands_up_status": "Hands Down"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid video or processing failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "TS-VID-02_MissingFile": {
+                    "summary": "TS-VID-02: Missing File Field",
+                    "value": {
+                      "error": "No file uploaded"
+                    }
+                  },
+                  "TS-VID-03_CorruptVideo": {
+                    "summary": "TS-VID-03: Corrupt Video Format",
+                    "value": {
+                      "error": "Could not decode uploaded video"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StandardResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "message": {
+            "type": "string",
+            "example": "Camera started"
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "No file uploaded"
+          }
+        },
+        "required": ["error"]
+      },
+      "CameraStatusResponse": {
+        "type": "object",
+        "properties": {
+          "is_running": {
+            "type": "boolean",
+            "example": true
+          },
+          "fps": {
+            "type": "number",
+            "format": "float",
+            "example": 30.0
+          }
+        },
+        "required": ["is_running", "fps"]
+      },
+      "PostureAnalytics": {
+        "type": "object",
+        "properties": {
+          "left_elbow_angle": {
+            "type": "number",
+            "nullable": true,
+            "example": 165.2
+          },
+          "right_elbow_angle": {
+            "type": "number",
+            "nullable": true,
+            "example": 158.0
+          },
+          "left_knee_angle": {
+            "type": "number",
+            "nullable": true,
+            "example": 178.5
+          },
+          "right_knee_angle": {
+            "type": "number",
+            "nullable": true,
+            "example": 176.2
+          },
+          "left_shoulder_angle": {
+            "type": "number",
+            "nullable": true,
+            "example": 25.4
+          },
+          "right_shoulder_angle": {
+            "type": "number",
+            "nullable": true,
+            "example": 23.1
+          },
+          "shoulder_slope": {
+            "type": "number",
+            "nullable": true,
+            "example": 1.5
+          },
+          "torso_inclination": {
+            "type": "number",
+            "nullable": true,
+            "example": 3.8
+          },
+          "posture_status": {
+            "type": "string",
+            "example": "Upright / Balanced",
+            "enum": ["Upright / Balanced", "Leaning / Slouched", "Shoulder Tilted", "Unknown"]
+          },
+          "hands_up_status": {
+            "type": "string",
+            "example": "Hands Down",
+            "enum": ["Hands Down", "Left Hand Raised", "Right Hand Raised", "Both Hands Raised", "None"]
+          }
+        }
+      },
+      "LandmarkPoint": {
+        "type": "object",
+        "properties": {
+          "x": { "type": "number", "format": "float", "example": 0.512 },
+          "y": { "type": "number", "format": "float", "example": 0.324 },
+          "z": { "type": "number", "format": "float", "example": -0.02 },
+          "visibility": { "type": "number", "format": "float", "example": 0.99 },
+          "presence": { "type": "number", "format": "float", "example": 0.99 }
+        },
+        "required": ["x", "y", "z"]
+      },
+      "LandmarksContainer": {
+        "type": "object",
+        "properties": {
+          "face_landmarks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/LandmarkPoint" },
+            "description": "478 Face Mesh Landmarks (including iris)"
+          },
+          "pose_landmarks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/LandmarkPoint" },
+            "description": "33 Body Pose Landmarks"
+          },
+          "left_hand_landmarks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/LandmarkPoint" },
+            "description": "21 Left Hand Landmarks"
+          },
+          "right_hand_landmarks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/LandmarkPoint" },
+            "description": "21 Right Hand Landmarks"
+          }
+        }
+      },
+      "TelemetryResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "live",
+            "enum": ["idle", "waiting_frames", "live"]
+          },
+          "fps": {
+            "type": "number",
+            "format": "float",
+            "example": 29.5
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/PostureAnalytics"
+          },
+          "face_landmarks_count": { "type": "integer", "example": 478 },
+          "pose_landmarks_count": { "type": "integer", "example": 33 },
+          "left_hand_landmarks_count": { "type": "integer", "example": 21 },
+          "right_hand_landmarks_count": { "type": "integer", "example": 21 },
+          "landmarks": {
+            "$ref": "#/components/schemas/LandmarksContainer"
+          }
+        },
+        "required": [
+          "status",
+          "fps",
+          "analytics",
+          "face_landmarks_count",
+          "pose_landmarks_count",
+          "left_hand_landmarks_count",
+          "right_hand_landmarks_count"
+        ]
+      },
+      "ProcessImageResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "inference_time_ms": {
+            "type": "number",
+            "format": "float",
+            "example": 45.3
+          },
+          "fps": {
+            "type": "number",
+            "format": "float",
+            "example": 22.1
+          },
+          "annotated_image_base64": {
+            "type": "string",
+            "description": "Data URL Base64 JPEG string of annotated image",
+            "example": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/PostureAnalytics"
+          },
+          "face_landmarks_count": { "type": "integer", "example": 478 },
+          "pose_landmarks_count": { "type": "integer", "example": 33 },
+          "left_hand_landmarks_count": { "type": "integer", "example": 21 },
+          "right_hand_landmarks_count": { "type": "integer", "example": 21 },
+          "landmarks": {
+            "$ref": "#/components/schemas/LandmarksContainer"
+          }
+        },
+        "required": [
+          "status",
+          "inference_time_ms",
+          "fps",
+          "annotated_image_base64",
+          "analytics",
+          "face_landmarks_count",
+          "pose_landmarks_count",
+          "left_hand_landmarks_count",
+          "right_hand_landmarks_count",
+          "landmarks"
+        ]
+      },
+      "ProcessVideoResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "output_video_url": {
+            "type": "string",
+            "example": "/static/uploads/output_1724500000_clip.mp4"
+          },
+          "processed_frames": {
+            "type": "integer",
+            "example": 150
+          },
+          "total_time_seconds": {
+            "type": "number",
+            "format": "float",
+            "example": 5.2
+          },
+          "average_fps": {
+            "type": "number",
+            "format": "float",
+            "example": 28.8
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/PostureAnalytics"
+          }
+        },
+        "required": [
+          "status",
+          "output_video_url",
+          "processed_frames",
+          "total_time_seconds",
+          "average_fps",
+          "analytics"
+        ]
+      }
+    }
+  }
+}
