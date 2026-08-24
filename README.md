@@ -2,14 +2,14 @@
 **Course:** Digital Image Processing (Work_6)  
 **Repository:** [Kong19565/IMG_Processing-Holistic_landmark](https://github.com/Kong19565/IMG_Processing-Holistic_landmark)
 
-### 👥 คณะผู้จัดทำและการแบ่งหน้าที่รายบุคคล (Group Members & Branch Assignments)
+### 👥 คณะผู้จัดทำและการแบ่งหน้าที่ (Group Members)
 
-| ลำดับ | รหัสนักศึกษา | ชื่อ-นามสกุล (TH) | Name-Surname (EN) | สาขาที่รับผิดชอบ (Git Branch) | รายละเอียดหน้าที่ความรับผิดชอบ |
-| :---: | :---: | :--- | :--- | :--- | :--- |
-| **1** | **6710301007** | นาย ดรัณภพ พิทักษ์กิจไพศาล | Darunpop Pitakkitpaisarn | `feat/core-holistic-engine`<br>`feat/cli-local-eval` | - ศึกษาโครงสร้างโมเดล Google MediaPipe Tasks API<br>- พัฒนาระบบดาวน์โหลดโมเดลอัตโนมัติ (`core/model_manager.py`)<br>- พัฒนาการคำนวณชีวกลศาสตร์และมุมข้อต่อ 2D/3D (`core/analytics.py`)<br>- จัดเตรียมสื่อทดสอบและวัดค่า Benchmark Latency (`sample_media/`) |
-| **2** | **6710301009** | นาย อภิสักก์ คงภักดี | Apisak Kongphakdee | `feat/core-holistic-engine`<br>`feat/flask-web-dashboard`<br>`main` | - พัฒนา Core Detector Engine Wrapper (`core/holistic_detector.py`)<br>- พัฒนาระบบ Custom Drawing Utilities สำหรับ 543 Landmarks (`core/drawing_utils.py`)<br>- ออกแบบสถาปัตยกรรม Dark Dashboard UI และเชื่อมต่อ Client Controller (`static/`, `templates/`)<br>- ผสานรวม (Merge) โค้ดทุก Branch และดูแลเอกสารโครงการ |
-| **3** | **6710301032** | นาย ธนัท จงธีรธนโชติ | Thanut Jongteerathanachote | `feat/cli-local-eval` | - ออกแบบและพัฒนาระบบ Command-Line Interface (`main_cli.py`)<br>- พัฒนาระบบประมวลผลกล้อง Webcam สด พร้อมปุ่มลัด (Hotkeys) สลับเลเยอร์แบบเรียลไทม์<br>- พัฒนาไปป์ไลน์ประมวลผลไฟล์วิดีโอ Frame-by-frame และ Export ข้อมูล Landmark JSON |
-| **4** | **6710301047** | นาย วิรัชสัณห์ เจนนานาโชค | Viruchsun Jennanachok | `feat/flask-web-dashboard` | - ออกแบบและพัฒนาสถาปัตยกรรม Web Server ด้วย Flask (`app.py`)<br>- พัฒนาระบบ Thread-safe Camera Manager สำหรับสตรีมภาพสด MJPEG Feed (`/video_feed`)<br>- พัฒนา REST APIs สำหรับรับส่งข้อมูลการประมวลผลภาพ/วิดีโอ และ Real-time Telemetry Polling |
+| รหัสนักศึกษา | ชื่อ-นามสกุล (TH / EN) | หน้าที่รับผิดชอบหลัก (แบบย่อ) |
+| :---: | :--- | :--- |
+| **6710301007** | นาย ดรัณภพ พิทักษ์กิจไพศาล<br>*(Darunpop Pitakkitpaisarn)* | จัดการโมเดล (.task) และระบบคำนวณชีวกลศาสตร์ (`core/analytics.py`, `core/model_manager.py`) |
+| **6710301009** | นาย อภิสักก์ คงภักดี<br>*(Apisak Kongphakdee)* | พัฒนาตัวประมวลผลหลัก, ระบบวาดพิกัด และหน้าเว็บ UI Dashboard (`core/`, `static/`, `templates/`) |
+| **6710301032** | นาย ธนัท จงธีรธนโชติ<br>*(Thanut Jongteerathanachote)* | พัฒนาระบบประมวลผล CLI กล้องสด/รูปภาพ/วิดีโอ และ Export JSON (`main_cli.py`) |
+| **6710301047** | นาย วิรัชสัณห์ เจนนานาโชค<br>*(Viruchsun Jennanachok)* | พัฒนา Web Server, การสตรีมภาพสด และ REST APIs (`app.py`) |
 
 ---
 
