@@ -1,7 +1,14 @@
 # MediaPipe Holistic Landmark Detection & Biometric Analytics Studio
 **Course:** Digital Image Processing (Work_6)  
-**Author:** Apisak Kongpakdee (Student ID: 6710301009)  
 **Repository:** [Kong19565/IMG_Processing-Holistic_landmark](https://github.com/Kong19565/IMG_Processing-Holistic_landmark)
+
+### 👥 คณะผู้จัดทำ (Group Members)
+| ลำดับ | รหัสนักศึกษา | ชื่อ-นามสกุล (TH) | Name-Surname (EN) |
+| :---: | :---: | :--- | :--- |
+| 1 | 6710301007 | นาย ดรัณภพ พิทักษ์กิจไพศาล | Darunpop Pitakkitpaisarn |
+| 2 | 6710301009 | นาย อภิสักก์ คงภักดี | Apisak Kongphakdee |
+| 3 | 6710301032 | นาย ธนัท จงธีรธนโชติ | Thanut Jongteerathanachote |
+| 4 | 6710301047 | นาย วิรัชสัณห์ เจนนานาโชค | Viruchsun Jennanachok |
 
 ---
 
