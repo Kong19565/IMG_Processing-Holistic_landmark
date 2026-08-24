@@ -330,9 +330,70 @@ def api_process_video():
     })
 
 
+@app.route("/swagger.json")
+def swagger_json():
+    """Serves the OpenAPI 3.0 (Swagger) specification JSON file."""
+    spec_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "swagger.json")
+    if os.path.exists(spec_path):
+        with open(spec_path, "r", encoding="utf-8") as f:
+            return Response(f.read(), mimetype="application/json")
+    return jsonify({"error": "Swagger spec not found"}), 404
+
+
+@app.route("/docs")
+@app.route("/swagger")
+def swagger_ui():
+    """Interactive Swagger UI Dashboard for API testing and scenario validation."""
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swagger UI - MediaPipe Holistic Landmark API</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" >
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/favicon-32x32.png" sizes="32x32" />
+    <style>
+      html { box-sizing: border-box; overflow-y: scroll; }
+      *, *:before, *:after { box-sizing: inherit; }
+      body { margin: 0; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      .topbar { display: none !important; }
+      .swagger-ui .info { margin: 20px 0; }
+      .swagger-ui .info .title { color: #0f172a; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"> </script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"> </script>
+    <script>
+    window.onload = function() {
+      window.ui = SwaggerUIBundle({
+        url: "/swagger.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        defaultModelsExpandDepth: 2,
+        defaultModelExpandDepth: 2,
+        docExpansion: "list"
+      });
+    };
+    </script>
+</body>
+</html>"""
+    return Response(html_content, mimetype="text/html")
+
+
 if __name__ == "__main__":
     print("=" * 60)
     print(" MediaPipe Holistic Landmark Studio Web Server")
-    print(" Open URL in browser: http://localhost:5000")
+    print(" Web Dashboard:  http://localhost:5000")
+    print(" Swagger UI:     http://localhost:5000/docs")
     print("=" * 60)
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)
+
