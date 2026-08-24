@@ -1,0 +1,6 @@
+mediapipe>=1.0.1
+opencv-python>=4.10.0
+flask>=3.0.0
+numpy>=1.26.0
+werkzeug>=3.0.0
+Pillow>=10.0.0
